@@ -1,1 +1,1 @@
-# dshPython
+# Drexel Smart House Data Collector
