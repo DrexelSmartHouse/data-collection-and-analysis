@@ -8,11 +8,21 @@ and check when a device goes down.
 import paho.mqtt.client as mqtt
 import time
 
-# TODO replace with config file
-server_ip = '192.168.1.2'
-server_port = 1883
-client_id = 'rfm69 manager'
-
+#config file reading function
+def config_file(filename):
+    
+    file = open(filename,"r")
+    dictionary={}
+    for line in file:
+        if ":" in line:
+            index = line.index(':')
+            dictionary.update({line[:index]: line[(index+1): -1]})
+    server_ip = dictionary['server_ip']
+    server_port = dictionary['server_port']
+    client_id = dictionary['client_id']
+    interval = dictionary['interval']
+    return(server_ip, server_port, client_id, interval)
+ 
 # max number of seconds without sending a message to the broker
 # This will ping the server at the interval defined below if no
 # other communications occur
@@ -43,6 +53,10 @@ def sweep(client, network_id):
 
 def main():
 
+    #default config filename set to config_file.txt
+    filename=input("Enter Filename: ") or "config_file.txt"
+    #reads config file and returns relevant variables
+    (server_ip, server_port, client_id, interval) = config_file(filename)
     client = mqtt.Client(client_id)
     
     # set the callback functions
@@ -60,11 +74,8 @@ def main():
         scan(client, 0)
         sweep(client, 0)
         time.sleep(sweep_interval_s)
-
-
     # stop the thread
     client.loop_stop()
-
 
 if __name__ == '__main__':
     main()
