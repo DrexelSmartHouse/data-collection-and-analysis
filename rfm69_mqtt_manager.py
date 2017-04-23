@@ -33,7 +33,8 @@ def on_message(client, userdata, msg):
     if(len(spTopic)>4):
         try:
             with open(dataFileName, 'r' ,newline='') as data:
-                print('File was Found')
+                #file was found, if not, exception
+                pass
             with open(dataFileName, 'a' ,newline='') as data:
                 writer = csv.DictWriter(data, fields)
                 writer.writerow({fields[0]: datetime.datetime.now(), 
@@ -101,7 +102,6 @@ def main():
 
     # main loop
     while True:
-        print(time.clock() - startTime)
         send_request('SCAN',client,0)
         send_request('SWEEP',client,0)
         time.sleep(sweep_interval_s)
