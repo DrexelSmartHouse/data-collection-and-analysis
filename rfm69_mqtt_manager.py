@@ -27,19 +27,13 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     print(msg.topic + " " + str(msg.payload))
 
-# helper functions
-
-def scan(client, network_id):
+# helper function
+#request: either "SCAN" or "SWEEP"
+def send_request(request,client,network_id):
     topic = 'RFM69/' + str(network_id) + '/requests'
-    client.publish(topic, 'SCAN', 1)
-
-def sweep(client, network_id):
-    topic = 'RFM69/' + str(network_id) + '/requests'
-    client.publish(topic, 'SWEEP', 1)
-
-
+    client.publish(topic, request, 1)
+    
 # signal handler for ctrl-c
-
 def signal_handler(signal, frame):
     print("Ending Program.....")
     sys.exit(0)
@@ -75,8 +69,8 @@ def main():
 
     # main loop
     while True:
-        scan(client, 0)
-        sweep(client, 0)
+        send_request(SCAN,client,0)
+        send_request(SWEEP,client,0)
         time.sleep(sweep_interval_s)
     # stop the thread
     client.loop_stop()
