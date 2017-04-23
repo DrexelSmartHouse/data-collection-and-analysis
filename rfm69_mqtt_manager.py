@@ -8,6 +8,8 @@ and check when a device goes down.
 
 import paho.mqtt.client as mqtt
 import time
+import signal, sys
+
 
 from config_file import get_conf
 
@@ -35,7 +37,16 @@ def sweep(client, network_id):
     topic = 'RFM69/' + str(network_id) + '/requests'
     client.publish(topic, 'SWEEP', 1)
 
+
+# signal handler for ctrl-c
+
+def signal_handler(signal, frame):
+    print("Ending Program.....")
+    sys.exit(0)
+
 def main():
+
+    signal.signal(signal.SIGINT, signal_handler)
 
     # get consts from the config file
     conf_file = open(conf_file_path, 'r') # TODO check for errors opening file and ask the user for the location
