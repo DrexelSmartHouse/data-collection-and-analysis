@@ -14,8 +14,8 @@ visScheme = "h";
 fName = 'dshData.csv';
 delim = ',';
 %cannot be lees than 2 or more than the number of rows of data
-startRow = 153700;
-%startRow = 2;
+%startRow = 153700;
+startRow = 2;
 WIDTH = 1300;
 HEIGHT = 700;
 %gets the size of the screen being used
@@ -98,7 +98,7 @@ elseif (strcmp(visScheme, "t"))
     %Separates temp data from each node to be graphed separately
     for i = 1:dataLength
         %finds the temp data
-        %if(strcmp(SensorType{i},'TEMPC') && NodeID(i)==13)
+        %if(strcmp(SensorType{i},'TEMPC') && (NodeID(i)==1 || NodeID(i)==3))
         if(strcmp(SensorType{i},'TEMPC'))
             %adds temp data to preallocated array index(NodeID,End of the
             %column)
@@ -182,4 +182,4 @@ elseif (strcmp(visScheme, "h"))
     xlabel('Date') % x-axis label
     ylabel('Value') % y-axis label
 end
-clearvars fName delimiter startRow formatSpec fileID dataArray ans Time SensorType SensorValue NetworkID NodeID;
+%clearvars fName delimiter startRow formatSpec fileID dataArray ans Time SensorType SensorValue NetworkID NodeID;
