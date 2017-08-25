@@ -4,8 +4,16 @@
 This is a simple mqtt client that manages the rfm69 network.
 It does things like poll the sensors at a specified interval
 and check when a device goes down.
+
+Please configure your database information.
+This information has been redacted from the file due to privacy concerns.
+
+The MQTT message will be parsed into an array with indices in this format:
+('Time', 'Network ID', 'Node ID', 'Sensor Type', 'Sensor Value')
+
 """
 
+from influxdb import InfluxDBClient
 import paho.mqtt.client as mqtt
 import time
 import signal, sys
@@ -24,35 +32,26 @@ def on_connect(client, userdata, flags, rc):
     print('connected with result: ' + str(rc))
 
     # resubscribe whenever connecting or reconnecting
-    client.subscribe("RFM69/#")
+    client.subscribe("RFM69/0/+/+")
 
 def on_message(client, userdata, msg):
     print(msg.topic + " " + str(msg.payload))
     spTopic = msg.topic.split("/")
-    fields = ('Time', 'Network ID', 'Node ID', 'Sensor Type', 'Sensor Value')
-    if(len(spTopic)>4):
-        try:
-            with open(dataFileName, 'r' ,newline='') as data:
-                #file was found, if not, exception
-                pass
-            with open(dataFileName, 'a' ,newline='') as data:
-                writer = csv.DictWriter(data, fields)
-                writer.writerow({fields[0]: datetime.datetime.now(), 
-                                fields[1]: spTopic[2], 
-                                fields[2]: spTopic[3], 
-                                fields[3]: spTopic[4],
-                                fields[4]: float(msg.payload)})
-        except FileNotFoundError:
-            print('File was not found, creating "dshData.csv"')
-            with open(dataFileName, 'w' ,newline='') as data:
-                writer = csv.DictWriter(data, fields)
-                headers = dict((n,n) for n in fields )
-                writer.writerow(headers)
-                writer.writerow({fields[0]: datetime.datetime.now(), 
-                                 fields[1]: spTopic[2], 
-                                 fields[2]: spTopic[3], 
-                                 fields[3]: spTopic[4],
-                                 fields[4]: float(msg.payload)})
+    msg_json = [
+        {
+            "measurement": "Grafana",
+            "tags": {
+                "NodeID": spTopic[3],
+		"SensorType": spTopic[4]
+            },
+            "fields": {
+                "NetworkID": spTopic[2],
+		"SensorValue": float(msg.payload)
+            }
+        }
+    ]
+    clientdb = InfluxDBClient(hostDB, portDB, userDB, pwDB, dbName)
+    clientdb.write_points(msg_json)
     
 # helper function
 #request: either "SCAN" or "SWEEP"
@@ -63,7 +62,7 @@ def send_request(request,client,network_id):
 
 # signal handler for ctrl-c
 def signal_handler(signal, frame):
-    print("Ending Program.....")
+    print("\nEnding Program.....")
     sys.exit(0)
 
 def main():
@@ -87,6 +86,11 @@ def main():
     client_id = config['client id']
     keep_alive = config['keep alive'] # max number of seconds without sending a message to the broker
     sweep_interval_s = config['interval']
+    hostDB = config['host']
+    portDB = config['port']
+    userDB = config['user']
+    pwDB = config['password']
+    dbName = config['databasename']
 
     client = mqtt.Client(client_id)
     
