@@ -1,7 +1,7 @@
 def get_conf(conf_file):
-    
-    """ 
-    This function takes the config file as an argument 
+
+    """
+    This function takes the config file as an argument
     and returns a dictionary of the value contained in
     the file.
     """
@@ -14,12 +14,12 @@ def get_conf(conf_file):
         if '#' in line:
             line = line[:line.index('#')]
 
-        # build the dictionary from the ':' seperated pairs 
+        # build the dictionary from the ':' seperated pairs
         if ':' in line:
             line = line.split(':')
             key = line[0].strip().lower()
             value = line[1].strip().lower()
-            
+
             # convert to int if possible
             try:
                 value = int(value)
@@ -37,7 +37,7 @@ if __name__ == '__main__':
     file = open(filename,"r")
 
     conf = get_conf(file)
-    
+
     print(conf)
 
     #for key, value in conf.iteritems():
